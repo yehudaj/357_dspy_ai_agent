@@ -17,7 +17,7 @@ from tools import (
 
 # Set up MLflow tracking with SQLite backend
 mlflow.set_tracking_uri("sqlite:///mlruns.db")
-mlflow.set_experiment("DSPy")
+mlflow.set_experiment("airline-agent")
 
 # Enable MLflow autologging for DSPy - this captures all traces automatically
 mlflow.dspy.autolog()
@@ -78,9 +78,8 @@ agent = dspy.ReAct(
 if __name__ == "__main__":
     # Example usage
     print("=== DSPy Airline Customer Service Agent ===\n")
-    
-    # Start MLflow parent run for the session
-    with mlflow.start_run(run_name="Agent_Session") as parent_run:
+    # Start MLflow session run
+    with mlflow.start_run(run_name="Agent_Session"):
         mlflow.log_param("model", "gpt-4o-mini")
         mlflow.log_param("agent_type", "ReAct")
         mlflow.log_param("max_iters", 5)
@@ -106,6 +105,9 @@ if __name__ == "__main__":
                 
                 # Log response
                 mlflow.log_text(result.process_result, f"response_{interaction_count}.txt")
+            
+            # Log to parent run
+            mlflow.log_metric("total_interactions", interaction_count, step=interaction_count)
             
             # Log to parent run
             mlflow.log_metric("total_interactions", interaction_count, step=interaction_count)
