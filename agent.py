@@ -1,5 +1,6 @@
 """AI Agent for airline customer service using DSPy."""
 import dspy
+import mlflow
 from config import get_openai_key
 from tools import (
     fetch_flight_info,
@@ -10,6 +11,9 @@ from tools import (
     get_user_info,
     file_ticket,
 )
+
+# Set up MLflow tracking
+mlflow.set_experiment("dspy_airline_agent")
 
 
 class DSPyAirlineCustomerService(dspy.Signature):
@@ -49,13 +53,25 @@ agent = dspy.ReAct(
 if __name__ == "__main__":
     # Example usage
     print("=== DSPy Airline Customer Service Agent ===\n")
-    while True:
-        user_request = input("\nUser: ").strip()
-        if not user_request or user_request.lower() in ['exit', 'quit', 'bye']:
-            print("Thank you for using our service. Goodbye!")
-            break
+    
+    # Start MLflow run
+    with mlflow.start_run():
+        mlflow.log_param("model", "gpt-3.5-turbo")
+        mlflow.log_param("agent_type", "ReAct")
         
-        result = agent(user_request=user_request)
-        print(f"Agent: {result.process_result}")
+        while True:
+            user_request = input("\nUser: ").strip()
+            if not user_request or user_request.lower() in ['exit', 'quit', 'bye']:
+                print("Thank you for using our service. Goodbye!")
+                break
+            
+            # Log user request
+            mlflow.log_param(f"request_{mlflow.active_run().info.run_id[:8]}", user_request[:100])
+            
+            result = agent(user_request=user_request)
+            print(f"Agent: {result.process_result}")
+            
+            # Log response
+            mlflow.log_metric("interactions", 1)
     # Test case: Book a flight
     
