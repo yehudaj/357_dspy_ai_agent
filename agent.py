@@ -16,15 +16,11 @@ from tools import (
 )
 
 # Set up MLflow tracking with SQLite backend
-mlflow.set_tracking_uri("sqlite:///mlflow.db")
-mlflow.set_experiment("dspy_airline_agent")
+mlflow.set_tracking_uri("sqlite:///mlruns.db")
+mlflow.set_experiment("DSPy")
 
-# Enable MLflow autologging for DSPy
-mlflow.dspy.autolog(
-    log_traces=True,  # Log full traces including prompts and responses
-    disable=False,
-    silent=False,
-)
+# Enable MLflow autologging for DSPy - this captures all traces automatically
+mlflow.dspy.autolog()
 
 
 class DSPyAirlineCustomerService(dspy.Signature):
