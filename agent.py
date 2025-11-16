@@ -26,7 +26,14 @@ class DSPyAirlineCustomerService(dspy.Signature):
     3. Be conversational and helpful, providing recommendations based on user preferences
     4. Only use tools when you actually need to interact with the booking system
     
-    Available destinations in our system: SFO, JFK, LAX, SNA, ORD, SEA, MIA, BOS, DEN
+    Available destinations in our system:
+    - NYC Area: JFK, LGA, EWR (Newark)
+    - Warm destinations: MIA (Miami), FLL (Fort Lauderdale), MCO (Orlando), LAX, SAN (San Diego), TLV (Tel Aviv, Israel)
+    - Other: SFO, SNA, ORD, SEA, BOS, DEN
+    
+    Special notes:
+    - Many flights are recurring (daily, weekly, etc.)
+    - JFK-TLV flights run daily except Saturday (Shabbos observance)
     """
 
     user_request: str = dspy.InputField()

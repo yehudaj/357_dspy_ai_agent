@@ -1,5 +1,17 @@
 """Data models for the AI agent."""
 from pydantic import BaseModel
+from typing import Optional, Literal
+from enum import Enum
+
+
+class DayOfWeek(str, Enum):
+    MONDAY = "Monday"
+    TUESDAY = "Tuesday"
+    WEDNESDAY = "Wednesday"
+    THURSDAY = "Thursday"
+    FRIDAY = "Friday"
+    SATURDAY = "Saturday"
+    SUNDAY = "Sunday"
 
 
 class Date(BaseModel):
@@ -9,6 +21,13 @@ class Date(BaseModel):
     month: int
     day: int
     hour: int
+
+
+class RecurringSchedule(BaseModel):
+    """Schedule for recurring flights"""
+    frequency: Literal["daily", "weekly", "weekdays", "weekends"]
+    excluded_days: list[DayOfWeek] = []  # e.g., exclude Saturday for Shabbos
+    days_of_week: Optional[list[DayOfWeek]] = None  # for weekly frequency
 
 
 class UserProfile(BaseModel):
@@ -24,6 +43,7 @@ class Flight(BaseModel):
     destination: str
     duration: float
     price: float
+    recurring_schedule: Optional[RecurringSchedule] = None  # None means one-time flight
 
 
 class Itinerary(BaseModel):
@@ -50,6 +70,160 @@ user_database = {
 }
 
 flight_database = {
+    # JFK to TLV (New York JFK to Tel Aviv) - Daily except Saturday (Shabbos)
+    "DA1001": Flight(
+        flight_id="DA1001",
+        origin="JFK",
+        destination="TLV",
+        date_time=Date(year=2025, month=12, day=1, hour=23),
+        duration=11.0,
+        price=850,
+        recurring_schedule=RecurringSchedule(
+            frequency="daily",
+            excluded_days=[DayOfWeek.SATURDAY]
+        )
+    ),
+    "DA1002": Flight(
+        flight_id="DA1002",
+        origin="JFK",
+        destination="TLV",
+        date_time=Date(year=2025, month=12, day=1, hour=10),
+        duration=11.0,
+        price=920,
+        recurring_schedule=RecurringSchedule(
+            frequency="daily",
+            excluded_days=[DayOfWeek.SATURDAY]
+        )
+    ),
+    
+    # JFK to MIA (New York to Miami) - Daily warm destination
+    "DA1010": Flight(
+        flight_id="DA1010",
+        origin="JFK",
+        destination="MIA",
+        date_time=Date(year=2025, month=12, day=1, hour=7),
+        duration=3.0,
+        price=280,
+        recurring_schedule=RecurringSchedule(frequency="daily", excluded_days=[])
+    ),
+    "DA1011": Flight(
+        flight_id="DA1011",
+        origin="JFK",
+        destination="MIA",
+        date_time=Date(year=2025, month=12, day=1, hour=14),
+        duration=3.0,
+        price=310,
+        recurring_schedule=RecurringSchedule(frequency="daily", excluded_days=[])
+    ),
+    
+    # LGA to MIA (LaGuardia to Miami) - Weekdays
+    "DA1020": Flight(
+        flight_id="DA1020",
+        origin="LGA",
+        destination="MIA",
+        date_time=Date(year=2025, month=12, day=2, hour=8),
+        duration=3.0,
+        price=260,
+        recurring_schedule=RecurringSchedule(frequency="weekdays", excluded_days=[])
+    ),
+    
+    # EWR to MIA (Newark to Miami) - Daily
+    "DA1030": Flight(
+        flight_id="DA1030",
+        origin="EWR",
+        destination="MIA",
+        date_time=Date(year=2025, month=12, day=1, hour=9),
+        duration=3.0,
+        price=270,
+        recurring_schedule=RecurringSchedule(frequency="daily", excluded_days=[])
+    ),
+    
+    # JFK to LAX (New York to Los Angeles) - Daily
+    "DA1040": Flight(
+        flight_id="DA1040",
+        origin="JFK",
+        destination="LAX",
+        date_time=Date(year=2025, month=12, day=1, hour=6),
+        duration=6.0,
+        price=420,
+        recurring_schedule=RecurringSchedule(frequency="daily", excluded_days=[])
+    ),
+    "DA1041": Flight(
+        flight_id="DA1041",
+        origin="JFK",
+        destination="LAX",
+        date_time=Date(year=2025, month=12, day=1, hour=13),
+        duration=6.0,
+        price=450,
+        recurring_schedule=RecurringSchedule(frequency="daily", excluded_days=[])
+    ),
+    
+    # LGA to FLL (LaGuardia to Fort Lauderdale) - Daily warm destination
+    "DA1050": Flight(
+        flight_id="DA1050",
+        origin="LGA",
+        destination="FLL",
+        date_time=Date(year=2025, month=12, day=1, hour=7),
+        duration=3.0,
+        price=240,
+        recurring_schedule=RecurringSchedule(frequency="daily", excluded_days=[])
+    ),
+    
+    # EWR to MCO (Newark to Orlando) - Daily warm destination
+    "DA1060": Flight(
+        flight_id="DA1060",
+        origin="EWR",
+        destination="MCO",
+        date_time=Date(year=2025, month=12, day=1, hour=8),
+        duration=2.5,
+        price=220,
+        recurring_schedule=RecurringSchedule(frequency="daily", excluded_days=[])
+    ),
+    
+    # JFK to SAN (New York to San Diego) - Every Tuesday and Thursday
+    "DA1070": Flight(
+        flight_id="DA1070",
+        origin="JFK",
+        destination="SAN",
+        date_time=Date(year=2025, month=12, day=2, hour=9),
+        duration=6.0,
+        price=480,
+        recurring_schedule=RecurringSchedule(
+            frequency="weekly",
+            days_of_week=[DayOfWeek.TUESDAY, DayOfWeek.THURSDAY],
+            excluded_days=[]
+        )
+    ),
+    
+    # TLV to JFK (Tel Aviv to New York) - Daily except Saturday
+    "DA1080": Flight(
+        flight_id="DA1080",
+        origin="TLV",
+        destination="JFK",
+        date_time=Date(year=2025, month=12, day=1, hour=14),
+        duration=12.0,
+        price=880,
+        recurring_schedule=RecurringSchedule(
+            frequency="daily",
+            excluded_days=[DayOfWeek.SATURDAY]
+        )
+    ),
+    
+    # EWR to TLV (Newark to Tel Aviv) - Sunday, Tuesday, Thursday
+    "DA1090": Flight(
+        flight_id="DA1090",
+        origin="EWR",
+        destination="TLV",
+        date_time=Date(year=2025, month=12, day=1, hour=22),
+        duration=11.0,
+        price=830,
+        recurring_schedule=RecurringSchedule(
+            frequency="weekly",
+            days_of_week=[DayOfWeek.SUNDAY, DayOfWeek.TUESDAY, DayOfWeek.THURSDAY],
+            excluded_days=[]
+        )
+    ),
+    
     # SFO to JFK (San Francisco to New York)
     "DA123": Flight(
         flight_id="DA123",
