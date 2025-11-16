@@ -3,8 +3,8 @@ import dspy
 from config import get_openai_key
 
 # Configure DSPy with OpenAI
-lm = dspy.OpenAI(model='gpt-3.5-turbo', api_key=get_openai_key())
-dspy.settings.configure(lm=lm)
+lm = dspy.LM(model='openai/gpt-3.5-turbo', api_key=get_openai_key())
+dspy.configure(lm=lm)
 
 # Example: Simple question answering
 class BasicQA(dspy.Signature):
