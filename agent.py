@@ -22,7 +22,6 @@ mlflow.set_experiment("dspy_airline_agent")
 # Enable MLflow autologging for DSPy
 mlflow.dspy.autolog(
     log_traces=True,  # Log full traces including prompts and responses
-    log_models=False,  # Don't log model artifacts
     disable=False,
     silent=False,
 )
