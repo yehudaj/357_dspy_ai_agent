@@ -32,6 +32,7 @@ env/
 # MLflow
 mlruns/
 mlartifacts/
+mlflow.db
 
 # IDEs
 .vscode/

@@ -12,7 +12,8 @@ from tools import (
     file_ticket,
 )
 
-# Set up MLflow tracking
+# Set up MLflow tracking with SQLite backend
+mlflow.set_tracking_uri("sqlite:///mlflow.db")
 mlflow.set_experiment("dspy_airline_agent")
 
 
