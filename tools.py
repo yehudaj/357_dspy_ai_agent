@@ -32,32 +32,16 @@ def get_available_destinations(origin: str):
     return sorted(list(destinations))
 
 
-def get_warm_destinations():
-    """Get list of warm weather destinations available in our system.
+def get_all_destinations():
+    """Get all available destination airports in the system.
     
     Returns:
-        Dictionary with destination codes and descriptions
+        List of all destination airport codes
     """
-    warm_destinations = {
-        "MIA": "Miami, Florida - tropical climate year-round",
-        "FLL": "Fort Lauderdale, Florida - warm beaches",
-        "MCO": "Orlando, Florida - theme parks and sunshine",
-        "LAX": "Los Angeles, California - sunny Southern California",
-        "SAN": "San Diego, California - perfect weather year-round",
-        "TLV": "Tel Aviv, Israel - Mediterranean climate, warm in winter",
-    }
-    
-    # Check which ones we actually have flights to
-    available_warm_dests = {}
-    all_destinations = set()
+    destinations = set()
     for flight in flight_database.values():
-        all_destinations.add(flight.destination)
-    
-    for code, desc in warm_destinations.items():
-        if code in all_destinations:
-            available_warm_dests[code] = desc
-    
-    return available_warm_dests
+        destinations.add(flight.destination)
+    return sorted(list(destinations))
 
 
 def search_routes(origin: str, destination: Optional[str] = None):

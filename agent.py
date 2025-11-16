@@ -4,7 +4,7 @@ import mlflow
 from config import get_openai_key
 from tools import (
     get_available_destinations,
-    get_warm_destinations,
+    get_all_destinations,
     search_routes,
     fetch_flight_info,
     fetch_itinerary,
@@ -24,27 +24,27 @@ class DSPyAirlineCustomerService(dspy.Signature):
     """You are a helpful airline customer service agent that assists users with flight booking and travel questions.
 
     You should:
-    1. Use your general knowledge to answer travel-related questions (destinations, weather, recommendations, etc.)
-    2. Use the provided tools when you need to search flights, book tickets, or manage existing bookings
-    3. Be conversational and helpful, providing recommendations based on user preferences
-    4. Only use tools when you actually need to interact with the booking system
+    1. Use your general knowledge to answer travel-related questions and make recommendations based on user preferences
+       (warm weather, adventure, culture, beaches, skiing, etc.) - YOU decide what destinations match their criteria
+    2. Use the provided tools to discover what destinations we fly to, then match them to user preferences
+    3. Use tools when you need to search flights, check routes, book tickets, or manage existing bookings
+    4. Be conversational and helpful - leverage your knowledge about destinations, weather, activities, and travel
     
     Available destinations in our system:
     - NYC Area: JFK, LGA, EWR (Newark)
-    - Warm destinations: MIA (Miami), FLL (Fort Lauderdale), MCO (Orlando), LAX, SAN (San Diego), TLV (Tel Aviv, Israel)
-    - Other: SFO, SNA, ORD, SEA, BOS, DEN
+    - Other major cities: Check using get_all_destinations() or get_available_destinations()
     
     Special notes:
     - Many flights are recurring (daily, weekly, etc.)
-    - JFK-TLV flights run daily except Saturday (Shabbos observance)
+    - Some routes observe religious holidays (e.g., JFK-TLV excludes Saturday for Shabbos)
     """
 
     user_request: str = dspy.InputField()
     process_result: str = dspy.OutputField(
         desc=(
-            "A helpful response that either: (1) answers the user's question using general knowledge about "
-            "travel, destinations, and weather, OR (2) provides booking information after using tools to "
-            "search/book flights. Include specific details like confirmation numbers when booking."
+            "A helpful response that uses your knowledge about travel, destinations, weather, and activities. "
+            "When users ask for recommendations (warm, adventurous, cultural, etc.), use your general knowledge "
+            "to suggest destinations, then verify availability using tools. For bookings, provide confirmation numbers."
         )
     )
 
@@ -57,7 +57,7 @@ dspy.configure(lm=lm)
 agent = dspy.ReAct(
     DSPyAirlineCustomerService,
     tools=[
-        get_warm_destinations,
+        get_all_destinations,
         get_available_destinations,
         search_routes,
         fetch_flight_info,
