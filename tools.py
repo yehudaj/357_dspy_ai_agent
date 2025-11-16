@@ -1,6 +1,8 @@
 """Tools for the DSPy AI agent to interact with flight booking system."""
 import random
 import string
+from datetime import datetime
+from typing import Optional
 from datamodel import (
     Date,
     Flight,
@@ -12,6 +14,80 @@ from datamodel import (
     ticket_database,
     user_database,
 )
+
+
+def get_available_destinations(origin: str):
+    """Get all available destinations from a given origin airport.
+    
+    Args:
+        origin: Airport code (e.g., 'JFK', 'LGA', 'EWR')
+    
+    Returns:
+        List of destination airport codes available from this origin
+    """
+    destinations = set()
+    for flight in flight_database.values():
+        if flight.origin == origin:
+            destinations.add(flight.destination)
+    return sorted(list(destinations))
+
+
+def get_warm_destinations():
+    """Get list of warm weather destinations available in our system.
+    
+    Returns:
+        Dictionary with destination codes and descriptions
+    """
+    warm_destinations = {
+        "MIA": "Miami, Florida - tropical climate year-round",
+        "FLL": "Fort Lauderdale, Florida - warm beaches",
+        "MCO": "Orlando, Florida - theme parks and sunshine",
+        "LAX": "Los Angeles, California - sunny Southern California",
+        "SAN": "San Diego, California - perfect weather year-round",
+        "TLV": "Tel Aviv, Israel - Mediterranean climate, warm in winter",
+    }
+    
+    # Check which ones we actually have flights to
+    available_warm_dests = {}
+    all_destinations = set()
+    for flight in flight_database.values():
+        all_destinations.add(flight.destination)
+    
+    for code, desc in warm_destinations.items():
+        if code in all_destinations:
+            available_warm_dests[code] = desc
+    
+    return available_warm_dests
+
+
+def search_routes(origin: str, destination: Optional[str] = None):
+    """Search for available routes from an origin, optionally filtered by destination.
+    
+    Args:
+        origin: Origin airport code
+        destination: Optional destination airport code to filter by
+    
+    Returns:
+        List of flight information including route, schedule, and pricing
+    """
+    routes = []
+    for flight in flight_database.values():
+        if flight.origin == origin:
+            if destination is None or flight.destination == destination:
+                route_info = {
+                    "flight_id": flight.flight_id,
+                    "route": f"{flight.origin} -> {flight.destination}",
+                    "duration": flight.duration,
+                    "price": flight.price,
+                    "sample_time": f"{flight.date_time.hour}:00",
+                    "recurring": flight.recurring_schedule is not None,
+                }
+                if flight.recurring_schedule:
+                    route_info["frequency"] = flight.recurring_schedule.frequency
+                    if flight.recurring_schedule.excluded_days:
+                        route_info["excluded_days"] = [day.value for day in flight.recurring_schedule.excluded_days]
+                routes.append(route_info)
+    return routes
 
 
 def fetch_flight_info(date: Date, origin: str, destination: str):

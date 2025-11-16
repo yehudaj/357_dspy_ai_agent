@@ -3,6 +3,9 @@ import dspy
 import mlflow
 from config import get_openai_key
 from tools import (
+    get_available_destinations,
+    get_warm_destinations,
+    search_routes,
     fetch_flight_info,
     fetch_itinerary,
     pick_flight,
@@ -54,6 +57,9 @@ dspy.configure(lm=lm)
 agent = dspy.ReAct(
     DSPyAirlineCustomerService,
     tools=[
+        get_warm_destinations,
+        get_available_destinations,
+        search_routes,
         fetch_flight_info,
         fetch_itinerary,
         pick_flight,
