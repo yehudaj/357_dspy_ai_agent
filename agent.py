@@ -69,19 +69,24 @@ if __name__ == "__main__":
         mlflow.log_param("agent_type", "ReAct")
         mlflow.log_param("max_iters", 5)
         
+        interaction_count = 0
+        
         while True:
             user_request = input("\nUser: ").strip()
             if not user_request or user_request.lower() in ['exit', 'quit', 'bye']:
                 print("Thank you for using our service. Goodbye!")
                 break
             
-            # Log user request
-            mlflow.log_param(f"request_{mlflow.active_run().info.run_id[:8]}", user_request[:100])
+            interaction_count += 1
+            
+            # Log interaction as metric with step number
+            mlflow.log_metric("total_interactions", interaction_count)
+            mlflow.log_text(user_request, f"requests/request_{interaction_count}.txt")
             
             result = agent(user_request=user_request)
             print(f"Agent: {result.process_result}")
             
             # Log response
-            mlflow.log_metric("interactions", 1)
+            mlflow.log_text(result.process_result, f"responses/response_{interaction_count}.txt")
     # Test case: Book a flight
     
