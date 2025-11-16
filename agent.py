@@ -49,10 +49,13 @@ agent = dspy.ReAct(
 if __name__ == "__main__":
     # Example usage
     print("=== DSPy Airline Customer Service Agent ===\n")
-    
+    while True:
+        user_request = input("\nUser: ").strip()
+        if not user_request or user_request.lower() in ['exit', 'quit', 'bye']:
+            print("Thank you for using our service. Goodbye!")
+            break
+        
+        result = agent(user_request=user_request)
+        print(f"Agent: {result.process_result}")
     # Test case: Book a flight
-    user_request = "Hi, I'm Adam and I want to book a flight from SFO to JFK on September 1, 2025"
-    print(f"User: {user_request}")
     
-    result = agent(user_request=user_request)
-    print(f"\nAgent: {result.process_result}")
