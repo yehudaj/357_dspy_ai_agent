@@ -18,25 +18,32 @@ mlflow.set_experiment("dspy_airline_agent")
 
 
 class DSPyAirlineCustomerService(dspy.Signature):
-    """You are an airline customer service agent that helps user book and manage flights.
+    """You are a helpful airline customer service agent that assists users with flight booking and travel questions.
 
-    You are given a list of tools to handle user request, and you should decide the right tool to use in order to
-    fulfill users' request."""
+    You should:
+    1. Use your general knowledge to answer travel-related questions (destinations, weather, recommendations, etc.)
+    2. Use the provided tools when you need to search flights, book tickets, or manage existing bookings
+    3. Be conversational and helpful, providing recommendations based on user preferences
+    4. Only use tools when you actually need to interact with the booking system
+    
+    Available destinations in our system: SFO, JFK, LAX, SNA, ORD, SEA, MIA, BOS, DEN
+    """
 
     user_request: str = dspy.InputField()
     process_result: str = dspy.OutputField(
         desc=(
-            "Message that summarizes the process result, and the information users need, e.g., the "
-            "confirmation_number if a new flight is booked."
+            "A helpful response that either: (1) answers the user's question using general knowledge about "
+            "travel, destinations, and weather, OR (2) provides booking information after using tools to "
+            "search/book flights. Include specific details like confirmation numbers when booking."
         )
     )
 
 
-# Configure DSPy with OpenAI
-lm = dspy.LM(model='openai/gpt-3.5-turbo', api_key=get_openai_key())
+# Configure DSPy with OpenAI - using gpt-4 for better reasoning
+lm = dspy.LM(model='openai/gpt-4o-mini', api_key=get_openai_key())
 dspy.configure(lm=lm)
 
-# Create the ReAct agent
+# Create the ReAct agent with max_iters to prevent excessive tool calling
 agent = dspy.ReAct(
     DSPyAirlineCustomerService,
     tools=[
@@ -47,7 +54,8 @@ agent = dspy.ReAct(
         cancel_itinerary,
         get_user_info,
         file_ticket,
-    ]
+    ],
+    max_iters=5  # Limit iterations to prevent endless loops
 )
 
 
@@ -57,8 +65,9 @@ if __name__ == "__main__":
     
     # Start MLflow run
     with mlflow.start_run():
-        mlflow.log_param("model", "gpt-3.5-turbo")
+        mlflow.log_param("model", "gpt-4o-mini")
         mlflow.log_param("agent_type", "ReAct")
+        mlflow.log_param("max_iters", 5)
         
         while True:
             user_request = input("\nUser: ").strip()
