@@ -29,16 +29,20 @@ class DSPyAirlineCustomerService(dspy.Signature):
     You should:
     1. Use your general knowledge to answer travel-related questions and make recommendations based on user preferences
        (warm weather, adventure, culture, beaches, skiing, etc.) - YOU decide what destinations match their criteria
-    2. Use the provided tools to discover what destinations we fly to, then match them to user preferences
-    3. Use tools when you need to search flights, check routes, book tickets, or manage existing bookings
-    4. Be conversational and helpful - leverage your knowledge about destinations, weather, activities, and travel
+    2. When a user specifies their origin (or you know it from context), use get_available_destinations(origin) or 
+       search_routes(origin) to see what we fly to from there - DON'T get all destinations first
+    3. Use search_routes() to get flight information (prices, schedules, recurring patterns) without needing exact dates
+    4. Only use fetch_flight_info() when you have a specific date and need to book
+    5. Be conversational and helpful - leverage your knowledge about destinations, weather, activities, and travel
     
-    Available destinations in our system:
-    - NYC Area: JFK, LGA, EWR (Newark)
-    - Other major cities: Check using get_all_destinations() or get_available_destinations()
+    IMPORTANT WORKFLOW:
+    - User mentions origin (e.g., "I'm in NYC") → use get_available_destinations(origin) to see options from there
+    - User asks for recommendations → use your knowledge + available destinations to suggest matches
+    - User wants to see flights → use search_routes(origin, destination) to show options
+    - User wants to book → use fetch_flight_info() with exact date, then book_flight()
     
     Special notes:
-    - Many flights are recurring (daily, weekly, etc.)
+    - Many flights are recurring (daily, weekly, etc.) - search_routes shows this
     - Some routes observe religious holidays (e.g., JFK-TLV excludes Saturday for Shabbos)
     """
 
@@ -46,8 +50,8 @@ class DSPyAirlineCustomerService(dspy.Signature):
     process_result: str = dspy.OutputField(
         desc=(
             "A helpful response that uses your knowledge about travel, destinations, weather, and activities. "
-            "When users ask for recommendations (warm, adventurous, cultural, etc.), use your general knowledge "
-            "to suggest destinations, then verify availability using tools. For bookings, provide confirmation numbers."
+            "When users ask for recommendations, check what destinations are available FROM THEIR ORIGIN first, "
+            "then use your knowledge to match those to their preferences. For bookings, provide confirmation numbers."
         )
     )
 

@@ -33,15 +33,22 @@ def get_available_destinations(origin: str):
 
 
 def get_all_destinations():
-    """Get all available destination airports in the system.
+    """Get all available destination airports in the system with basic context.
+    Use this to see what destinations we fly to, then use your knowledge to match them to user preferences.
     
     Returns:
-        List of all destination airport codes
+        Dictionary with airport codes as keys and basic info as values
     """
-    destinations = set()
+    destinations = {}
     for flight in flight_database.values():
-        destinations.add(flight.destination)
-    return sorted(list(destinations))
+        dest = flight.destination
+        if dest not in destinations:
+            destinations[dest] = {
+                "code": dest,
+                "sample_price": flight.price,
+                "sample_duration": flight.duration,
+            }
+    return destinations
 
 
 def search_routes(origin: str, destination: Optional[str] = None):
