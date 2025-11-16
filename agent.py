@@ -83,8 +83,8 @@ if __name__ == "__main__":
     # Example usage
     print("=== DSPy Airline Customer Service Agent ===\n")
     
-    # Start MLflow run
-    with mlflow.start_run():
+    # Start MLflow parent run for the session
+    with mlflow.start_run(run_name="Agent_Session") as parent_run:
         mlflow.log_param("model", "gpt-4o-mini")
         mlflow.log_param("agent_type", "ReAct")
         mlflow.log_param("max_iters", 5)
@@ -99,14 +99,19 @@ if __name__ == "__main__":
             
             interaction_count += 1
             
-            # Log interaction as metric with step number
-            mlflow.log_metric("total_interactions", interaction_count)
-            mlflow.log_text(user_request, f"requests/request_{interaction_count}.txt")
+            # Create a nested run for each interaction to capture separate traces
+            with mlflow.start_run(run_name=f"Interaction_{interaction_count}", nested=True):
+                # Log user request
+                mlflow.log_param("user_request", user_request[:100])
+                mlflow.log_text(user_request, f"request_{interaction_count}.txt")
+                
+                result = agent(user_request=user_request)
+                print(f"Agent: {result.process_result}")
+                
+                # Log response
+                mlflow.log_text(result.process_result, f"response_{interaction_count}.txt")
             
-            result = agent(user_request=user_request)
-            print(f"Agent: {result.process_result}")
-            
-            # Log response
-            mlflow.log_text(result.process_result, f"responses/response_{interaction_count}.txt")
+            # Log to parent run
+            mlflow.log_metric("total_interactions", interaction_count, step=interaction_count)
     # Test case: Book a flight
     
