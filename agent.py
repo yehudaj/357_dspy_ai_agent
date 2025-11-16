@@ -19,6 +19,14 @@ from tools import (
 mlflow.set_tracking_uri("sqlite:///mlflow.db")
 mlflow.set_experiment("dspy_airline_agent")
 
+# Enable MLflow autologging for DSPy
+mlflow.dspy.autolog(
+    log_traces=True,  # Log full traces including prompts and responses
+    log_models=False,  # Don't log model artifacts
+    disable=False,
+    silent=False,
+)
+
 
 class DSPyAirlineCustomerService(dspy.Signature):
     """You are a helpful airline customer service agent that assists users with flight booking and travel questions.
