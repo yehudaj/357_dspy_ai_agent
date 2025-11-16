@@ -39,7 +39,13 @@ class DSPyAirlineCustomerService(dspy.Signature):
     - User mentions origin (e.g., "I'm in NYC") → use get_available_destinations(origin) to see options from there
     - User asks for recommendations → use your knowledge + available destinations to suggest matches
     - User wants to see flights → use search_routes(origin, destination) to show options
-    - User wants to book → use fetch_flight_info() with exact date, then book_flight()
+    - User wants to book → NEVER book immediately! First present options and ask for confirmation of:
+      * Exact date
+      * Specific flight/time
+      * User's full name for the booking
+    - Only call book_flight() AFTER user explicitly confirms all details
+    
+    CRITICAL: Do NOT book flights without explicit user confirmation of date, time, and passenger details!
     
     Special notes:
     - Many flights are recurring (daily, weekly, etc.) - search_routes shows this
@@ -51,7 +57,9 @@ class DSPyAirlineCustomerService(dspy.Signature):
         desc=(
             "A helpful response that uses your knowledge about travel, destinations, weather, and activities. "
             "When users ask for recommendations, check what destinations are available FROM THEIR ORIGIN first, "
-            "then use your knowledge to match those to their preferences. For bookings, provide confirmation numbers."
+            "then use your knowledge to match those to their preferences. "
+            "For bookings, ALWAYS confirm date, time, and passenger name before calling book_flight(). "
+            "Present options and ask 'Would you like me to book this flight?' before proceeding."
         )
     )
 
